@@ -7,7 +7,6 @@ import (
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
-	"io"
 	"io/ioutil"
 	"net/http"
 )
@@ -21,13 +20,14 @@ func Fetch(url string) ([]byte, error) {
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("fetch error status code:%d", resp.StatusCode)
 	}
-	e := determineEncoding(resp.Body)
-	urf8Reader := transform.NewReader(resp.Body, e.NewDecoder())
+	bufferReader := bufio.NewReader(resp.Body)
+	e := determineEncoding(bufferReader)
+	urf8Reader := transform.NewReader(bufferReader, e.NewDecoder())
 	return ioutil.ReadAll(urf8Reader)
 }
 
-func determineEncoding(r io.Reader) encoding.Encoding {
-	bytes, err := bufio.NewReader(r).Peek(1024)
+func determineEncoding(r *bufio.Reader) encoding.Encoding {
+	bytes, err := r.Peek(1024)
 	if err != nil {
 		//读取文档编码错误，返回默认编码：UTF-8
 		return unicode.UTF8
