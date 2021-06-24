@@ -12,7 +12,7 @@ import (
 )
 
 func Fetch(url string) ([]byte, error) {
-	resp, err := http.Get("http://localhost:8080/mock/www.zhenai.com/zhenghun")
+	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
@@ -20,10 +20,11 @@ func Fetch(url string) ([]byte, error) {
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("fetch error status code:%d", resp.StatusCode)
 	}
-	bufferReader := bufio.NewReader(resp.Body)
-	e := determineEncoding(bufferReader)
-	urf8Reader := transform.NewReader(bufferReader, e.NewDecoder())
-	return ioutil.ReadAll(urf8Reader)
+	bodyReader := bufio.NewReader(resp.Body)
+	e := determineEncoding(bodyReader)
+	utf8Reader := transform.NewReader(bodyReader,
+		e.NewDecoder())
+	return ioutil.ReadAll(utf8Reader)
 }
 
 func determineEncoding(r *bufio.Reader) encoding.Encoding {
