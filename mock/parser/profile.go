@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"go-clawer/engine"
 	"go-clawer/models"
 	"regexp"
@@ -37,10 +36,10 @@ var guessRe = regexp.MustCompile(
 var idUrlRe = regexp.MustCompile(
 	`.*album\.zhenai\.com/u/([\d]+)`)
 
-func ParserProfile(contents []byte) engine.ParserResult {
+func ParserProfile(contents []byte, name string) engine.ParserResult {
 	profile := models.Profiles{}
 	age, err := strconv.Atoi(extractString(contents, ageRe))
-	fmt.Println(age)
+	profile.Name = name
 	if err == nil {
 		profile.Age = age
 	}
