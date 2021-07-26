@@ -8,6 +8,7 @@ import (
 type ConcurrentEngine struct {
 	Scheduler   Scheduler
 	WorkerCount int
+	ItemChan chan interface{}
 }
 
 type Scheduler interface {
@@ -34,13 +35,14 @@ func (e *ConcurrentEngine) Run(seeds ...Request) {
 		}
 		e.Scheduler.Submit(r)
 	}
-	profileCount := 0
+
 	for {
 		result := <-out
 		for _, item := range result.Items {
 			if _, ok := item.(models.Profiles); ok {
-				fmt.Printf("Get Profile:#%d,%v\n", profileCount, item)
-				profileCount++
+				go func() {
+					e.ItemChan <- item
+				}()
 			}
 		}
 		for _, request := range result.Requests {
