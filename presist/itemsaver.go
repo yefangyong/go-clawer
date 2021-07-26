@@ -4,11 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/olivere/elastic/v7"
+	"go-clawer/engine"
 	"log"
 )
 
-func ItemSaver() chan interface{} {
-	out := make(chan interface{})
+func ItemSaver() chan engine.Item {
+	out := make(chan engine.Item)
 	go func() {
 		itemCount := 0
 		for {
@@ -26,12 +27,16 @@ func ItemSaver() chan interface{} {
 	return out
 }
 
-func save(item interface{}) (string, error) {
+func save(item engine.Item) (string, error) {
 	client, err := elastic.NewClient(elastic.SetSniff(false))
 	if err != nil {
 		return "", err
 	}
-	resp, err := client.Index().Index("crawler_data").BodyJson(item).Do(context.Background())
+	indexClient := client.Index().Index("crawler_data")
+	if item.Id != "" {
+		indexClient = indexClient.Id(item.Id)
+	}
+	resp, err := indexClient.BodyJson(item).Do(context.Background())
 	if err != nil {
 		return "", err
 	}
