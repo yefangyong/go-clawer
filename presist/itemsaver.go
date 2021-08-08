@@ -8,7 +8,11 @@ import (
 	"log"
 )
 
-func ItemSaver() chan engine.Item {
+func ItemSaver() (chan engine.Item, error) {
+	client, err := elastic.NewClient(elastic.SetSniff(false))
+	if err != nil {
+		return nil,err
+	}
 	out := make(chan engine.Item)
 	go func() {
 		itemCount := 0
@@ -17,21 +21,17 @@ func ItemSaver() chan engine.Item {
 			log.Printf("Item Saver: got item "+
 				"#%d: %v", itemCount, item)
 			itemCount++
-			_, err := save(item)
+			_, err := save(client, item)
 			if err != nil {
 				fmt.Printf("save error, saving item:%v,error:%v", item, err)
 			}
 		}
 
 	}()
-	return out
+	return out, nil
 }
 
-func save(item engine.Item) (string, error) {
-	client, err := elastic.NewClient(elastic.SetSniff(false))
-	if err != nil {
-		return "", err
-	}
+func save(client *elastic.Client, item engine.Item) (string, error) {
 	indexClient := client.Index().Index("crawler_data")
 	if item.Id != "" {
 		indexClient = indexClient.Id(item.Id)
