@@ -11,7 +11,7 @@ import (
 func ItemSaver() (chan engine.Item, error) {
 	client, err := elastic.NewClient(elastic.SetSniff(false))
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	out := make(chan engine.Item)
 	go func() {

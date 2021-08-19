@@ -11,11 +11,11 @@ type ParserResult struct {
 }
 
 type Item struct {
-	Id string
-	Url string
+	Id      string
+	Url     string
 	PayLoad interface{}
 }
 
-func NilParser([] byte) ParserResult {
+func NilParser([]byte) ParserResult {
 	return ParserResult{}
 }

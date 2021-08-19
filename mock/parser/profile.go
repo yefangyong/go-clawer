@@ -76,8 +76,8 @@ func ParserProfile(contents []byte, url string, name string) engine.ParserResult
 
 	result := engine.ParserResult{Items: []engine.Item{
 		{
-			Url:url,
-			Id: extractString([]byte(url),idUrlRe),
+			Url:     url,
+			Id:      extractString([]byte(url), idUrlRe),
 			PayLoad: profile,
 		},
 	}}

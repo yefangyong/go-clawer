@@ -7,7 +7,7 @@ type QueueScheduler struct {
 	workerChan  chan chan engine.Request
 }
 
-func (q *QueueScheduler) WorkChan() chan engine.Request{
+func (q *QueueScheduler) WorkChan() chan engine.Request {
 	return make(chan engine.Request)
 }
 
