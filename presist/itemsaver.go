@@ -9,7 +9,7 @@ import (
 	"github.com/olivere/elastic/v7"
 )
 
-func ItemSaver() (chan engine.Item, error) {
+func ItemSaver(index string) (chan engine.Item, error) {
 	client, err := elastic.NewClient(elastic.SetSniff(false))
 	if err != nil {
 		return nil, err
@@ -22,7 +22,7 @@ func ItemSaver() (chan engine.Item, error) {
 			log.Printf("Item Saver: got item "+
 				"#%d: %v", itemCount, item)
 			itemCount++
-			_, err := save(client, item)
+			_, err := Save(client, index, item)
 			if err != nil {
 				fmt.Printf("save error, saving item:%v,error:%v", item, err)
 			}
@@ -32,8 +32,8 @@ func ItemSaver() (chan engine.Item, error) {
 	return out, nil
 }
 
-func save(client *elastic.Client, item engine.Item) (string, error) {
-	indexClient := client.Index().Index("crawler_data")
+func Save(client *elastic.Client, index string, item engine.Item) (string, error) {
+	indexClient := client.Index().Index(index)
 	if item.Id != "" {
 		indexClient = indexClient.Id(item.Id)
 	}
