@@ -6,6 +6,7 @@ import (
 )
 
 type SimpleEngine struct {
+	ItemChan chan Item
 }
 
 func (e SimpleEngine) Run(seeds ...Request) {
@@ -13,7 +14,6 @@ func (e SimpleEngine) Run(seeds ...Request) {
 	for _, req := range seeds {
 		requests = append(requests, req)
 	}
-
 	for len(requests) > 0 {
 		r := requests[0]
 		requests = requests[1:]
@@ -22,7 +22,11 @@ func (e SimpleEngine) Run(seeds ...Request) {
 			continue
 		}
 		for _, item := range parserResult.Items {
-			log.Printf("Got item %v", item)
+			// 数据持久化
+			go func() {
+				e.ItemChan <- item
+			}()
+			log.Printf("Got item v: %v", item)
 		}
 		requests = append(requests, parserResult.Requests...)
 	}

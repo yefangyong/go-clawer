@@ -39,6 +39,7 @@ func (e *ConcurrentEngine) Run(seeds ...Request) {
 		result := <-out
 		for _, item := range result.Items {
 			//if _, ok := item.PayLoad.(models.Profiles); ok {
+			item := item
 			go func() {
 				e.ItemChan <- item
 			}()

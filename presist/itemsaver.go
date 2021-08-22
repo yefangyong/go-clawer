@@ -3,9 +3,10 @@ package presist
 import (
 	"context"
 	"fmt"
-	"github.com/olivere/elastic/v7"
 	"go-clawer/engine"
 	"log"
+
+	"github.com/olivere/elastic/v7"
 )
 
 func ItemSaver() (chan engine.Item, error) {
