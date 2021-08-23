@@ -9,7 +9,7 @@ import (
 
 func ItemSaver(host string) (chan engine.Item, error) {
 	out := make(chan engine.Item)
-	client, err := rpcsupport.NewClient(":1234")
+	client, err := rpcsupport.NewClient(host)
 	if err != nil {
 		return nil, err
 	}
