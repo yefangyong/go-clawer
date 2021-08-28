@@ -1,23 +1,26 @@
 package main
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"go-clawer/utils"
+	"io"
 	"log"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
-	"github.com/360EntSecGroup-Skylar/excelize"
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
 
 const baiduUrl = "https://www.baidu.com/su?&wd=%s&p=3&cb=BaiduSuggestion.callbacks.give1628576397062&json=1&t=%s"
 const OldSearchUrl = "https://so.2345.com/index/search.php?wd=%s&t=7.10&ver=v2.0&charset=utf-8&channel=ziyou"
 const SearchEtUrl = "https://so.2345.com/searchEt?wd=%s&cb=T.adZone.callback&t=7.10&ver=v2.0&charset=utf-8&channel=ziyou"
-const SearchUrl = "http://index-api.2345.com/search/search?keyword=%s&channel=1&baiduKeyword=%s&cb=T.adZone.callback"
+const SearchUrl = "http://localhost:60001/search/search?keyword=%s&channel=1&baiduKeyword=%s&cb=T.adZone.callback"
 
 type OldSearchData struct {
 	title    string
@@ -30,25 +33,27 @@ type NewSearchData struct {
 }
 
 func main() {
-	// 读取 excel 文件
-	f, err := excelize.OpenFile("/Users/yfy/opt/case/go-clawer/statics/search2.xlsx")
+	fileName := "/Users/yfy/opt/case/go-clawer/statics/query.csv"
+	fs, err := os.Open(fileName)
 	if err != nil {
 		log.Fatal(err)
 	}
 	out := count()
-	// Get all the rows in the Sheet1.
-	rows := f.GetRows("Sheet1")
-	for _, row := range rows {
-		for _, keyword := range row {
-			// 获取百度联想词，老的搜索联想接口，新的搜索联想接口，对比数据
-			if keyword != "" {
-				// 开启一个协程，去获取数据
-				go getSearchResult(keyword, out)
-				time.Sleep(time.Millisecond * 50)
-			}
+	r := csv.NewReader(fs)
+	for {
+		row, err := r.Read()
+		if err != nil && err != io.EOF {
+			log.Fatalf("can not read, err is %v", err)
+		}
+		if err == io.EOF {
+			log.Println("read csv file end")
+			time.Sleep(time.Hour * 12)
+		}
+		if row[0] != "" {
+			go getSearchResult(row[0], out)
+			time.Sleep(time.Millisecond * 5)
 		}
 	}
-	time.Sleep(time.Hour)
 }
 
 type SearchResult struct {
@@ -67,6 +72,9 @@ func getSearchResult(keyword string, out chan SearchResult) {
 	diffHitCount := 0 // 新老接口都命中，但是数据不一致
 	newDiffCount := 0 // 新接口命中，老接口没有命中
 	oldDiffCount := 0 // 旧接口命中，新接口没有命中
+	oldMatchTitle := ""
+	newMatchTitle := ""
+	same := 0
 	newSearchData := &NewSearchData{}
 	oldSearchData := &OldSearchData{}
 	baiduKeyword, err := getBaiduKeyword(keyword)
@@ -99,25 +107,45 @@ func getSearchResult(keyword string, out chan SearchResult) {
 			oldHitCount = oldHitCount + 1
 		}
 	}
-
 	if oldSearchData != nil && newSearchData != nil {
+		newMatchTitle = newSearchData.title
+		oldMatchTitle = oldSearchData.title
 		if oldSearchData.title == newSearchData.title && oldSearchData.subTitle == newSearchData.subTitle {
-			fmt.Printf("新老接口数据一致：%v\n", oldSearchData)
 			sameHitCount = sameHitCount + 1
+			same = 1
 		} else {
-			fmt.Printf("老的数据：%v\n", oldSearchData)
-			fmt.Printf("新的数据：%v\n", newSearchData)
 			diffHitCount = diffHitCount + 1
 		}
 	}
 
 	if oldSearchData == nil && newSearchData != nil {
+		newMatchTitle = newSearchData.title
 		newDiffCount = newDiffCount + 1
 	}
 
 	if oldSearchData != nil && newSearchData == nil {
 		oldDiffCount = oldDiffCount + 1
+		oldMatchTitle = oldSearchData.title
 	}
+
+	if oldMatchTitle != "" && newMatchTitle != "" && oldMatchTitle != newMatchTitle {
+		// 新老接口都命中，但是数据不一致
+		go writeDataToCSV("新老接口都命中，但是数据不一致", keyword, baiduKeyword, oldMatchTitle, newMatchTitle, same)
+	}
+
+	if oldMatchTitle == "" && newMatchTitle != "" {
+		// 新接口都命中，老接口没有命中
+		go writeDataToCSV("新接口都命中，老接口没有命中", keyword, baiduKeyword, oldMatchTitle, newMatchTitle, same)
+	}
+
+	if oldMatchTitle != "" && newMatchTitle == "" {
+		// 老接口都命中，新接口没有命中
+		go writeDataToCSV("老接口都命中，新接口没有命中", keyword, baiduKeyword, oldMatchTitle, newMatchTitle, same)
+	}
+
+	go writeDataToCSV("sum", keyword, baiduKeyword, oldMatchTitle, newMatchTitle, same)
+
+	// 把结果写入 csv 文件中
 	go func() {
 		out <- SearchResult{
 			NewHitCount:  newHitCount,
@@ -189,6 +217,27 @@ func getOldSearchData(baiduKeyword string) (*OldSearchData, error) {
 	return oldSearchData, nil
 }
 
+var lock sync.Mutex
+
+func writeDataToCSV(filename string, keyword string, baiduKeyword string, oldMatchTitle string, newMatchTitle string, same int) {
+	// 创建文件
+	lock.Lock()
+	newFileName := fmt.Sprintf("/Users/yfy/opt/case/go-clawer/statics/%s.csv", filename)
+	newFile, err := os.OpenFile(newFileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		newFile.Close()
+	}()
+	// 写数据到csv文件
+	w := csv.NewWriter(newFile)
+	w.Write([]string{keyword, baiduKeyword, oldMatchTitle, newMatchTitle, strconv.Itoa(same)})
+	//w.WriteAll(data)
+	w.Flush()
+	lock.Unlock()
+}
+
 // 获取百度联想词
 func getBaiduKeyword(keyword string) (string, error) {
 	urlPath := fmt.Sprintf(baiduUrl, strings.Trim(keyword, " "), strconv.FormatInt(time.Now().Unix(), 10))
@@ -231,14 +280,18 @@ func count() chan SearchResult {
 		for {
 			item := <-out
 			itemCount++
+			if itemCount == 10000 {
+				panic("数据量达到10000条，停止运行")
+			}
 			oldHitCount = oldHitCount + item.OldHitCount
 			newHitCount = newHitCount + item.NewHitCount
 			sameHitCount = sameHitCount + item.SameHitCount
 			diffHitCount = diffHitCount + item.DiffHitCount
 			newDiffCount = newDiffCount + item.NewDiffCount
 			oldDiffCount = oldDiffCount + item.OldDiffCount
-			log.Printf("get Item: #%d\n新接口命中数:%d\n老接口命中数:%d\n新老接口命中，且数据一致数:%d\n新老接口都命中，但是数据不一致:%d\n新接口命中，老接口没有命中:%d\n旧接口命中，新接口没有命中:%d\n",
-				itemCount, newHitCount, oldHitCount, sameHitCount, diffHitCount, newDiffCount, oldDiffCount)
+			percent := float64(sameHitCount) / (float64(sameHitCount) + float64(diffHitCount))
+			log.Printf("get Item: #%d\n新接口命中数:%d\n老接口命中数:%d\n新老接口命中，且数据一致数:%d\n新老接口都命中，但是数据不一致:%d\n新接口命中，老接口没有命中:%d\n旧接口命中，新接口没有命中:%d\n新老接口对比命中准确率：%v\n",
+				itemCount, newHitCount, oldHitCount, sameHitCount, diffHitCount, newDiffCount, oldDiffCount, percent)
 		}
 	}()
 	return out

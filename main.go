@@ -23,6 +23,7 @@ func main() {
 		WorkerCount: 10,
 		ItemChan:    itemChan,
 	}
-	concurrentEngine.Run(engine.Request{Url: "http://localhost:8080/mock/www.zhenai.com/zhenghun", ParserFun: parser.ParserCityList})
+	concurrentEngine.Run(engine.Request{Url: "http://localhost:8080/mock/www.zhenai.com/zhenghun",
+		Parser: engine.NewFuncParser(parser.ParserCityList, "ParserCityList")})
 
 }

@@ -84,6 +84,24 @@ func ParserProfile(contents []byte, url string, name string) engine.ParserResult
 	return result
 }
 
+type ProfileParse struct {
+	UserName string
+}
+
+func (p ProfileParse) Parse(contents []byte, url string) engine.ParserResult {
+	return ParserProfile(contents, url, p.UserName)
+}
+
+func (p ProfileParse) Serialize() (name string, args interface{}) {
+	return "ProfileParse", p.UserName
+}
+
+func newProfileParse(name string) *ProfileParse {
+	return &ProfileParse{
+		UserName: name,
+	}
+}
+
 func extractString(contents []byte, re *regexp.Regexp) string {
 	match := re.FindSubmatch(contents)
 
