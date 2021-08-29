@@ -72,7 +72,6 @@ func DeserializedResult(r ParserResult) engine.ParserResult {
 }
 
 func DeserializedParse(p SerializedParse) (engine.Parser, error) {
-	fmt.Println(p.Name)
 	switch p.Name {
 	case config.ParserCity:
 		return engine.NewFuncParser(parser.ParserCity, config.ParserCity), nil

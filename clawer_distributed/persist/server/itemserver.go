@@ -1,15 +1,26 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"go-clawer/clawer_distributed/persist"
 	"go-clawer/clawer_distributed/rpcsupport"
+	"go-clawer/config"
 	"log"
 
 	"github.com/olivere/elastic/v7"
 )
 
+var port = flag.Int("port", 0,
+	"the port for me to listen on")
+
 func main() {
-	log.Fatal(ServeRpc("127.0.0.1:1234", "test1"))
+	flag.Parse()
+	if *port == 0 {
+		fmt.Println("must specify a port")
+		return
+	}
+	log.Fatal(ServeRpc(fmt.Sprintf(":%d", *port), config.ElasticIndex))
 }
 
 func ServeRpc(host string, index string) error {

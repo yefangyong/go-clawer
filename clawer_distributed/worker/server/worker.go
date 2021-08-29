@@ -1,11 +1,21 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"go-clawer/clawer_distributed/rpcsupport"
 	"go-clawer/clawer_distributed/worker"
 	"log"
 )
 
+var port = flag.Int("port", 0,
+	"the port for me to listen on")
+
 func main() {
-	log.Fatal(rpcsupport.ServeRpc("127.0.0.1:2345", worker.CrawlService{}))
+	flag.Parse()
+	if *port == 0 {
+		fmt.Println("must specify a port")
+		return
+	}
+	log.Fatal(rpcsupport.ServeRpc(fmt.Sprintf(":%d", *port), worker.CrawlService{}))
 }
