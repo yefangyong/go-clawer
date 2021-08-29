@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	log.Fatal(ServeRpc(":1234", "test1"))
+	log.Fatal(ServeRpc("127.0.0.1:1234", "test1"))
 }
 
 func ServeRpc(host string, index string) error {

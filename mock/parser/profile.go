@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"go-clawer/config"
 	"go-clawer/engine"
 	"go-clawer/models"
 	"regexp"
@@ -93,7 +94,7 @@ func (p ProfileParse) Parse(contents []byte, url string) engine.ParserResult {
 }
 
 func (p ProfileParse) Serialize() (name string, args interface{}) {
-	return "ProfileParse", p.UserName
+	return config.ParserProfile, p.UserName
 }
 
 func NewProfileParse(name string) *ProfileParse {

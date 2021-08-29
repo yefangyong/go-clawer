@@ -2,15 +2,17 @@ package config
 
 const (
 	// Parser names
-	ParseCity     = "ParseCity"
-	ParseCityList = "ParseCityList"
-	ParseProfile  = "ParseProfile"
+	ParserCity     = "ParserCity"
+	ParserCityList = "ParserCityList"
+	ParserProfile  = "ParserProfile"
 
+	WorkerPort0    = 2345
 	ParseCarDetail = "ParseCarDetail"
 	ParseCarList   = "ParseCarList"
 	ParseCarModel  = "ParseCarModel"
 
-	NilParser = "NilParser"
+	CrawlServiceRpc = "CrawlService.Process"
+	NilParser       = "NilParser"
 
 	// ElasticSearch
 	ElasticIndex = "crawler_data"

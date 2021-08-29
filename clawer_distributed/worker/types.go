@@ -72,12 +72,13 @@ func DeserializedResult(r ParserResult) engine.ParserResult {
 }
 
 func DeserializedParse(p SerializedParse) (engine.Parser, error) {
+	fmt.Println(p.Name)
 	switch p.Name {
-	case config.ParseCity:
-		return engine.NewFuncParser(parser.ParserCity, config.ParseCity), nil
-	case config.ParseCityList:
-		return engine.NewFuncParser(parser.ParserCityList, config.ParseCityList), nil
-	case config.ParseProfile:
+	case config.ParserCity:
+		return engine.NewFuncParser(parser.ParserCity, config.ParserCity), nil
+	case config.ParserCityList:
+		return engine.NewFuncParser(parser.ParserCityList, config.ParserCityList), nil
+	case config.ParserProfile:
 		if userName, ok := p.Args.(string); ok {
 			return parser.NewProfileParse(userName), nil
 		} else {

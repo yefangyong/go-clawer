@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"go-clawer/config"
 	"go-clawer/engine"
 	"regexp"
 )
@@ -12,7 +13,7 @@ func ParserCityList(contents []byte, _ string) engine.ParserResult {
 	match := re.FindAllStringSubmatch(string(contents), -1)
 	result := engine.ParserResult{}
 	for _, m := range match {
-		result.Requests = append(result.Requests, engine.Request{Url: string(m[1]), Parser: engine.NewFuncParser(ParserCity, "ParseCity")})
+		result.Requests = append(result.Requests, engine.Request{Url: string(m[1]), Parser: engine.NewFuncParser(ParserCity, config.ParserCity)})
 	}
 	return result
 }
