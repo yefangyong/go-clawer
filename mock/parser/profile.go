@@ -96,7 +96,7 @@ func (p ProfileParse) Serialize() (name string, args interface{}) {
 	return "ProfileParse", p.UserName
 }
 
-func newProfileParse(name string) *ProfileParse {
+func NewProfileParse(name string) *ProfileParse {
 	return &ProfileParse{
 		UserName: name,
 	}
