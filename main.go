@@ -1,19 +1,21 @@
 package main
 
 import (
-	"go-clawer/config"
 	"go-clawer/engine"
 	"go-clawer/mock/parser"
-	"go-clawer/presist/elasticsearch"
+	"go-clawer/presist/mysql"
 	"go-clawer/scheduler"
 )
 
 func main() {
-	itemChan, err := elasticsearch.ItemSaver(config.ElasticIndex)
+	//itemChan, err := elasticsearch.ItemSaver(config.ElasticIndex)
+	//if err != nil {
+	//	panic(err)
+	//}
+	itemChan, err := mysql.ItemSaver()
 	if err != nil {
 		panic(err)
 	}
-
 	//simpleEngine := engine.SimpleEngine{
 	//	ItemChan: itemChan,
 	//}

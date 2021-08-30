@@ -1,4 +1,4 @@
-package presist
+package elasticsearch
 
 import (
 	"context"
