@@ -4,12 +4,12 @@ import (
 	"go-clawer/config"
 	"go-clawer/engine"
 	"go-clawer/mock/parser"
-	"go-clawer/presist"
+	"go-clawer/presist/elasticsearch"
 	"go-clawer/scheduler"
 )
 
 func main() {
-	itemChan, err := presist.ItemSaver(config.ElasticIndex)
+	itemChan, err := elasticsearch.ItemSaver(config.ElasticIndex)
 	if err != nil {
 		panic(err)
 	}
