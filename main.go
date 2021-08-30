@@ -8,10 +8,14 @@ import (
 )
 
 func main() {
+
+	// 使用 es 进行持久化
 	//itemChan, err := elasticsearch.ItemSaver(config.ElasticIndex)
 	//if err != nil {
 	//	panic(err)
 	//}
+
+	// 使用数据库进行持久化
 	itemChan, err := mysql.ItemSaver()
 	if err != nil {
 		panic(err)

@@ -75,9 +75,8 @@ func Save(engineGroup *xorm.EngineGroup, item engine.Item) {
 	zhenai.Url = item.Url
 	payload, _ := json.Marshal(item.PayLoad)
 	zhenai.Payload = string(payload)
-	res, err := engineGroup.Master().Insert(zhenai)
+	_, err := engineGroup.Master().Insert(zhenai)
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(res)
 }
