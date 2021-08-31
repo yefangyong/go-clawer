@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"go-clawer/clawer_distributed/persist"
+	"go-clawer/clawer_distributed/persist/elasticsearch"
 	"go-clawer/clawer_distributed/rpcsupport"
 	"go-clawer/config"
 	"log"
@@ -28,5 +28,5 @@ func ServeRpc(host string, index string) error {
 	if err != nil {
 		return err
 	}
-	return rpcsupport.ServeRpc(host, &persist.ItemSaverService{Client: client, Index: index})
+	return rpcsupport.ServeRpc(host, elasticsearch.ItemSaverService{Client: client, Index: index})
 }

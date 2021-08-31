@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	persist "go-clawer/clawer_distributed/persist/client"
+	elasticsearch "go-clawer/clawer_distributed/persist/elasticsearch/client"
 	"go-clawer/clawer_distributed/rpcsupport"
 	"go-clawer/clawer_distributed/worker/client"
 	"go-clawer/config"
@@ -25,7 +25,7 @@ var (
 
 func main() {
 	flag.Parse()
-	itemChan, err := persist.ItemSaver(*itemSaverHost)
+	itemChan, err := elasticsearch.ItemSaver(*itemSaverHost)
 	if err != nil {
 		panic(err)
 	}

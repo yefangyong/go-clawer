@@ -20,7 +20,7 @@ import (
 const baiduUrl = "https://www.baidu.com/su?&wd=%s&p=3&cb=BaiduSuggestion.callbacks.give1628576397062&json=1&t=%s"
 const OldSearchUrl = "https://so.2345.com/index/search.php?wd=%s&t=7.10&ver=v2.0&charset=utf-8&channel=ziyou"
 const SearchEtUrl = "https://so.2345.com/searchEt?wd=%s&cb=T.adZone.callback&t=7.10&ver=v2.0&charset=utf-8&channel=ziyou"
-const SearchUrl = "http://localhost:60001/search/search?keyword=%s&channel=1&baiduKeyword=%s&cb=T.adZone.callback"
+const SearchUrl = "https://index-api.2345.com/search/search?keyword=%s&channel=1&baiduKeyword=%s&cb=T.adZone.callback"
 
 type OldSearchData struct {
 	title    string
@@ -51,7 +51,7 @@ func main() {
 		}
 		if row[0] != "" {
 			go getSearchResult(row[0], out)
-			time.Sleep(time.Millisecond * 5)
+			time.Sleep(time.Millisecond * 10)
 		}
 	}
 }
@@ -281,7 +281,7 @@ func count() chan SearchResult {
 			item := <-out
 			itemCount++
 			if itemCount == 10000 {
-				panic("数据量达到10000条，停止运行")
+				panic("数据量达到100条，停止运行")
 			}
 			oldHitCount = oldHitCount + item.OldHitCount
 			newHitCount = newHitCount + item.NewHitCount

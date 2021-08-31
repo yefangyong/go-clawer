@@ -1,8 +1,8 @@
-package persist
+package elasticsearch
 
 import (
 	"go-clawer/engine"
-	"go-clawer/presist"
+	"go-clawer/presist/elasticsearch"
 	"log"
 
 	"github.com/olivere/elastic/v7"
@@ -14,7 +14,7 @@ type ItemSaverService struct {
 }
 
 func (s ItemSaverService) Save(item engine.Item, result *string) error {
-	itemId, err := presist.Save(s.Client, s.Index, item)
+	itemId, err := elasticsearch.Save(s.Client, s.Index, item)
 	log.Printf("Item %v saved.", item)
 	if err != nil {
 		log.Printf("Item save error ,item:%v,error:%v", item, err)
